@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#151714" />
+    <title>榮耀行動原型</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="topbar">
+        <div class="player-id">
+          <span class="avatar-mark" aria-hidden="true">榮</span>
+          <div>
+            <strong id="playerName">榮耀新人</strong>
+            <span id="playerClass">散人 Lv.1</span>
+          </div>
+        </div>
+        <div class="resource-strip">
+          <span id="powerValue">戰力 0</span>
+          <span id="goldValue">金幣 0</span>
+        </div>
+      </header>
+
+      <main class="screens">
+        <section class="screen-panel active" data-screen="adventure">
+          <section class="combat-stage" aria-label="榮耀戰場">
+            <canvas id="gameCanvas" width="960" height="540"></canvas>
+            <div class="stage-hud">
+              <div class="battle-target">
+                <span id="targetName">第十區訓練場</span>
+                <div class="thin-bar">
+                  <span id="targetHpBar"></span>
+                </div>
+              </div>
+              <button id="pauseButton" class="icon-button" type="button" aria-label="暫停">II</button>
+            </div>
+            <div class="vitals">
+              <div class="vital-row">
+                <span>HP</span>
+                <div class="meter hp"><span id="hpBar"></span></div>
+                <b id="hpText">0/0</b>
+              </div>
+              <div class="vital-row">
+                <span>MP</span>
+                <div class="meter mp"><span id="mpBar"></span></div>
+                <b id="mpText">0/0</b>
+              </div>
+            </div>
+            <div id="joystick" class="joystick" aria-label="移動">
+              <span id="stick"></span>
+            </div>
+            <div id="skillWheel" class="skill-wheel" aria-label="技能"></div>
+          </section>
+
+          <section class="mission-strip">
+            <div>
+              <span class="eyebrow">主線任務</span>
+              <strong id="questTitle">建立角色</strong>
+              <p id="questText">完成第一場訓練戰。</p>
+            </div>
+            <button id="primaryAction" class="primary-button" type="button">出戰</button>
+          </section>
+
+          <section class="log-panel" aria-label="戰鬥紀錄">
+            <div id="combatLog"></div>
+          </section>
+        </section>
+
+        <section class="screen-panel" data-screen="hero">
+          <section class="hero-summary">
+            <div>
+              <span class="eyebrow">角色</span>
+              <h1 id="heroTitle">散人</h1>
+              <p id="heroDescription">自由切換技能形態，適合高操作玩家。</p>
+            </div>
+            <button id="saveButton" class="icon-button solid" type="button" aria-label="存檔">存</button>
+          </section>
+          <section class="stat-grid" id="statGrid"></section>
+          <section class="class-panel">
+            <div class="panel-heading">
+              <h2>職業體系</h2>
+              <span>24 職業與散人原型</span>
+            </div>
+            <div id="classGrid" class="class-grid"></div>
+          </section>
+          <section class="skill-panel">
+            <div class="panel-heading">
+              <h2>技能養成</h2>
+              <span id="skillPointText">可用點數 0</span>
+            </div>
+            <div id="skillList" class="skill-list"></div>
+          </section>
+        </section>
+
+        <section class="screen-panel" data-screen="dungeon">
+          <section class="panel-heading top">
+            <h1>副本與野圖</h1>
+            <span id="energyValue">體力 0</span>
+          </section>
+          <div id="dungeonList" class="mode-list"></div>
+          <section class="inventory-panel">
+            <div class="panel-heading">
+              <h2>背包裝備</h2>
+              <button id="craftButton" class="small-button" type="button">打造</button>
+            </div>
+            <div id="gearSlots" class="gear-slots"></div>
+            <div id="inventoryList" class="inventory-list"></div>
+          </section>
+        </section>
+
+        <section class="screen-panel" data-screen="guild">
+          <section class="guild-banner">
+            <span class="eyebrow">公會</span>
+            <h1 id="guildName">第十區訓練營</h1>
+            <p id="guildStatus">AI 隊友會依照你的戰鬥紀錄調整分工。</p>
+          </section>
+          <div class="guild-actions">
+            <button class="secondary-button" data-guild-action="raid" type="button">公會副本</button>
+            <button class="secondary-button" data-guild-action="tech" type="button">升級科技</button>
+            <button class="secondary-button" data-guild-action="dispatch" type="button">派遣隊友</button>
+          </div>
+          <section id="guildTeam" class="team-list"></section>
+        </section>
+
+        <section class="screen-panel" data-screen="arena">
+          <section class="arena-board">
+            <div>
+              <span class="eyebrow">競技聯賽</span>
+              <h1 id="ratingValue">積分 1000</h1>
+              <p id="seasonText">新秀季常規賽</p>
+            </div>
+            <button id="seasonReward" class="primary-button" type="button">領取</button>
+          </section>
+          <div class="arena-modes">
+            <button data-arena="1v1" type="button">1 VS 1</button>
+            <button data-arena="3v3" type="button">3 VS 3</button>
+            <button data-arena="5v5" type="button">5 VS 5</button>
+          </div>
+          <section class="leaderboard">
+            <div class="panel-heading">
+              <h2>排名</h2>
+              <span>本地模擬賽季</span>
+            </div>
+            <ol id="leaderboard"></ol>
+          </section>
+        </section>
+      </main>
+
+      <nav class="tabbar" aria-label="主選單">
+        <button class="active" data-nav="adventure" type="button"><span>戰</span><b>冒險</b></button>
+        <button data-nav="hero" type="button"><span>角</span><b>角色</b></button>
+        <button data-nav="dungeon" type="button"><span>本</span><b>副本</b></button>
+        <button data-nav="guild" type="button"><span>會</span><b>公會</b></button>
+        <button data-nav="arena" type="button"><span>賽</span><b>競技</b></button>
+      </nav>
+    </div>
+
+    <script src="src/game.js"></script>
+  </body>
+</html>

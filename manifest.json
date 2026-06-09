@@ -1,0 +1,18 @@
+{
+  "name": "榮耀行動原型",
+  "short_name": "榮耀原型",
+  "description": "MMORPG、Boss、副本、公會與競技聯賽的手機遊戲原型。",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#151714",
+  "theme_color": "#151714",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

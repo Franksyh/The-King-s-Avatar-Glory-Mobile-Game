@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="榮耀行動原型圖示">
+  <rect width="512" height="512" rx="96" fill="#151714"/>
+  <path d="M96 356h320l-42 58H138z" fill="#d7a83f"/>
+  <path d="M256 72 396 330H116z" fill="#20231f" stroke="#d7a83f" stroke-width="28" stroke-linejoin="round"/>
+  <path d="M256 124v178M188 300h136" stroke="#f2f0e8" stroke-width="30" stroke-linecap="round"/>
+  <path d="M164 392h184" stroke="#4fb9a7" stroke-width="22" stroke-linecap="round"/>
+</svg>

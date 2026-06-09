@@ -1,0 +1,10 @@
+{
+  "name": "glory-mobile-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "榮耀行動手遊垂直切片原型。",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check src/game.js && node --check server.js"
+  }
+}
