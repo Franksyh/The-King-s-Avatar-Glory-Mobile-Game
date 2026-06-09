@@ -2,6 +2,8 @@
 
 Status: MVP Prototype / Mobile Web Game / First-person battle prototype added
 
+[Live Demo](https://the-kings-avatar-glory-mobile-game.netlify.app)
+
 這是一個可直接在瀏覽器執行的手機遊戲垂直切片，先把 MMORPG 手遊最核心的玩法跑起來：即時戰鬥、職業切換、技能冷卻、Boss、副本、裝備、公會、競技聯賽與本機存檔。
 
 > 商業化若要使用《全職高手》名稱、角色、隊伍、美術或小說設定，需要取得權利方授權。本專案目前使用原創視覺與可替換資料，適合作為玩法原型。

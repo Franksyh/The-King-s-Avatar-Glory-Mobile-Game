@@ -1,4 +1,5 @@
 node_modules/
 *.log
 verification-*.png
+.netlify/
 .DS_Store
