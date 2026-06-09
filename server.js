@@ -16,8 +16,9 @@ const mime = {
 
 const server = http.createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host}`);
-  if (url.pathname === "/api/game-state" || url.pathname === "/.netlify/functions/game-state") {
-    await handleFunctionRequest(request, response);
+  const functionName = resolveFunctionName(url.pathname);
+  if (functionName) {
+    await handleFunctionRequest(request, response, functionName);
     return;
   }
 
@@ -44,21 +45,48 @@ const server = http.createServer(async (request, response) => {
   });
 });
 
-async function handleFunctionRequest(request, response) {
+function resolveFunctionName(pathname) {
+  if (pathname === "/api/game-state" || pathname === "/.netlify/functions/game-state") return "game-state";
+  if (pathname === "/api/remote-room" || pathname === "/.netlify/functions/remote-room") return "remote-room";
+  return null;
+}
+
+async function handleFunctionRequest(request, response, functionName) {
   try {
-    const functionPath = path.join(root, "netlify", "functions", "game-state.mjs");
+    const functionPath = path.join(root, "netlify", "functions", `${functionName}.mjs`);
     const functionModule = await import(`${pathToFileUrl(functionPath)}?t=${Date.now()}`);
-    const functionResponse = await functionModule.default(new Request(`http://localhost${request.url}`), {});
-    const body = await functionResponse.text();
+    const requestBody = await readRequestBody(request);
+    const headers = new Headers();
+    if (request.headers["content-type"]) {
+      headers.set("content-type", request.headers["content-type"]);
+    }
+    const functionResponse = await functionModule.default(
+      new Request(`http://localhost${request.url}`, {
+        method: request.method,
+        headers,
+        body: requestBody.length > 0 ? requestBody : undefined
+      }),
+      {}
+    );
+    const responseBody = await functionResponse.text();
     response.writeHead(functionResponse.status, {
       "Content-Type": functionResponse.headers.get("content-type") || "application/json; charset=utf-8",
       "Cache-Control": "no-store"
     });
-    response.end(body);
+    response.end(responseBody);
   } catch (error) {
     response.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
     response.end(JSON.stringify({ error: "Function failed", detail: error.message }));
   }
+}
+
+function readRequestBody(request) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    request.on("data", (chunk) => chunks.push(chunk));
+    request.on("end", () => resolve(Buffer.concat(chunks)));
+    request.on("error", reject);
+  });
 }
 
 function pathToFileUrl(filePath) {

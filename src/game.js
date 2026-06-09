@@ -181,6 +181,16 @@
     seasonText: document.querySelector("#seasonText"),
     seasonReward: document.querySelector("#seasonReward"),
     leaderboard: document.querySelector("#leaderboard"),
+    remoteStatus: document.querySelector("#remoteStatus"),
+    currentRoomCode: document.querySelector("#currentRoomCode"),
+    remoteAlias: document.querySelector("#remoteAlias"),
+    roomCodeInput: document.querySelector("#roomCodeInput"),
+    createRoomButton: document.querySelector("#createRoomButton"),
+    joinRoomButton: document.querySelector("#joinRoomButton"),
+    syncRoomButton: document.querySelector("#syncRoomButton"),
+    remotePlayers: document.querySelector("#remotePlayers"),
+    remoteDeviceType: document.querySelector("#remoteDeviceType"),
+    remoteLog: document.querySelector("#remoteLog"),
     joystick: document.querySelector("#joystick"),
     stick: document.querySelector("#stick")
   };
@@ -205,6 +215,14 @@
   };
 
   const save = loadSave();
+  const remote = {
+    playerId: localStorage.getItem("glory-remote-player-id") || crypto.randomUUID(),
+    roomCode: localStorage.getItem("glory-remote-room-code") || "",
+    room: null,
+    pollTimer: null
+  };
+  localStorage.setItem("glory-remote-player-id", remote.playerId);
+
   const input = {
     x: 0,
     y: 0,
@@ -259,6 +277,7 @@
     refreshServerState();
     window.setInterval(refreshServerState, 30000);
     renderAll();
+    openInitialScreen();
     log("已進入第十區，行動端原型啟動。");
     requestAnimationFrame(loop);
   }
@@ -277,6 +296,10 @@
     });
 
     dom.claimLiveReward.addEventListener("click", claimLiveReward);
+    dom.createRoomButton.addEventListener("click", createRemoteRoom);
+    dom.joinRoomButton.addEventListener("click", joinRemoteRoom);
+    dom.syncRoomButton.addEventListener("click", syncRemoteRoom);
+    dom.remoteAlias.addEventListener("change", () => localStorage.setItem("glory-remote-alias", dom.remoteAlias.value.trim()));
 
     dom.saveButton.addEventListener("click", () => {
       persist();
@@ -319,6 +342,18 @@
     dom.joystick.addEventListener("pointermove", onStickMove);
     dom.joystick.addEventListener("pointerup", onStickEnd);
     dom.joystick.addEventListener("pointercancel", onStickEnd);
+
+    dom.remoteAlias.value = localStorage.getItem("glory-remote-alias") || save.name;
+    const queryRoom = new URLSearchParams(location.search).get("room");
+    if (queryRoom) {
+      remote.roomCode = normalizeRoomCode(queryRoom);
+      localStorage.setItem("glory-remote-room-code", remote.roomCode);
+    }
+    dom.roomCodeInput.value = remote.roomCode;
+    renderRemoteRoom(null, remote.roomCode ? "可同步上次房間。" : "尚未連線。");
+    if (remote.roomCode) {
+      window.setTimeout(syncRemoteRoom, 0);
+    }
   }
 
   function createSkillButtons() {
@@ -904,6 +939,14 @@
     renderAll();
   }
 
+  function openInitialScreen() {
+    const params = new URLSearchParams(location.search);
+    const requestedScreen = params.get("screen") || (params.get("room") ? "remote" : "");
+    if (requestedScreen && document.querySelector(`[data-screen="${requestedScreen}"]`)) {
+      switchScreen(requestedScreen);
+    }
+  }
+
   function renderAll() {
     renderHeader();
     renderCombatUi();
@@ -914,6 +957,7 @@
     renderInventory();
     renderGuild();
     renderArena();
+    renderRemoteRoom();
   }
 
   function renderHeader() {
@@ -1109,6 +1153,118 @@
     dom.leaderboard.innerHTML = rivals
       .map((item, index) => `<li><strong>${index + 1}. ${item[0]}</strong><span>${item[1]}</span></li>`)
       .join("");
+  }
+
+  async function createRemoteRoom() {
+    const result = await callRemoteRoom("create");
+    if (result?.room) {
+      setRemoteRoom(result.room.code, result.playerId);
+      renderRemoteRoom(result.room, "房間已建立，可分享房間碼。");
+      startRemotePolling();
+    }
+  }
+
+  async function joinRemoteRoom() {
+    const code = normalizeRoomCode(dom.roomCodeInput.value);
+    if (!code) {
+      renderRemoteRoom(null, "請輸入房間碼。");
+      return;
+    }
+    const result = await callRemoteRoom("join", code);
+    if (result?.room) {
+      setRemoteRoom(result.room.code, result.playerId);
+      renderRemoteRoom(result.room, "已加入遠端房間。");
+      startRemotePolling();
+    }
+  }
+
+  async function syncRemoteRoom() {
+    if (!remote.roomCode && dom.roomCodeInput.value) {
+      remote.roomCode = normalizeRoomCode(dom.roomCodeInput.value);
+    }
+    if (!remote.roomCode) {
+      renderRemoteRoom(null, "尚未連線。");
+      return;
+    }
+    const result = await callRemoteRoom("ping", remote.roomCode);
+    if (result?.room) {
+      renderRemoteRoom(result.room, "房間狀態已同步。");
+      startRemotePolling();
+    }
+  }
+
+  async function callRemoteRoom(action, roomCode) {
+    try {
+      const response = await fetch("/api/remote-room", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          action,
+          roomCode,
+          playerId: remote.playerId,
+          alias: dom.remoteAlias.value || save.name,
+          device: getDeviceType(),
+          level: save.level,
+          rating: save.rating
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        renderRemoteRoom(null, data.error === "ROOM_NOT_FOUND" ? "找不到房間。" : "遠端連線失敗。");
+        return null;
+      }
+      return data;
+    } catch {
+      renderRemoteRoom(null, "遠端連線失敗。");
+      return null;
+    }
+  }
+
+  function setRemoteRoom(roomCode, playerId) {
+    remote.roomCode = roomCode;
+    remote.playerId = playerId || remote.playerId;
+    dom.roomCodeInput.value = roomCode;
+    localStorage.setItem("glory-remote-room-code", roomCode);
+    localStorage.setItem("glory-remote-player-id", remote.playerId);
+  }
+
+  function startRemotePolling() {
+    window.clearInterval(remote.pollTimer);
+    remote.pollTimer = window.setInterval(syncRemoteRoom, 8000);
+  }
+
+  function renderRemoteRoom(room, message) {
+    if (room) {
+      remote.room = room;
+    }
+    const activeRoom = room || remote.room;
+    dom.remoteDeviceType.textContent = getDeviceType();
+    dom.currentRoomCode.textContent = activeRoom?.code || remote.roomCode || "未連線";
+    dom.remoteStatus.textContent = message || (activeRoom ? `${activeRoom.mission} · ${activeRoom.status === "connected" ? "已連線" : "等待玩家"}` : "建立房間或輸入房間碼，讓手機、電腦與網頁玩家加入同一個房間。");
+    const players = activeRoom?.players || [];
+    dom.remotePlayers.innerHTML = players.length
+      ? players.map((player) => `
+          <div class="team-member">
+            <div class="member-mark">${player.device.slice(0, 1)}</div>
+            <div>
+              <strong>${player.alias}</strong>
+              <span>${player.device} · Lv.${player.level} · 積分 ${player.rating}</span>
+            </div>
+            <div class="member-role">${player.id === remote.playerId ? "自己" : "隊友"}</div>
+          </div>
+        `).join("")
+      : `<div class="inventory-item"><strong>尚無遠端玩家</strong><span>建立房間後分享房間碼即可連線。</span></div>`;
+    dom.remoteLog.innerHTML = (activeRoom?.log || ["等待遠端連線。"]).slice(0, 6).map((item) => `<span>${item}</span>`).join("");
+  }
+
+  function getDeviceType() {
+    if (window.innerWidth < 680) return "手機版";
+    if (window.innerWidth < 1024) return "網頁版";
+    return "電腦版";
+  }
+
+  function normalizeRoomCode(value) {
+    return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
   }
 
   async function refreshServerState() {

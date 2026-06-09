@@ -364,6 +364,8 @@ button {
 .guild-banner,
 .arena-board,
 .leaderboard,
+.remote-board,
+.remote-panel,
 .log-panel {
   margin-top: 10px;
   padding: 12px;
@@ -376,6 +378,7 @@ button {
 .live-panel,
 .hero-summary,
 .arena-board,
+.remote-board,
 .panel-heading,
 .guild-actions {
   display: flex;
@@ -391,7 +394,9 @@ button {
 .hero-summary h1,
 .hero-summary p,
 .guild-banner h1,
+.remote-board h1,
 .guild-banner p,
+.remote-board p,
 .arena-board h1,
 .arena-board p {
   margin: 0;
@@ -460,7 +465,7 @@ button {
 
 .tabbar {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
   gap: 6px;
   background: #181b17;
@@ -697,6 +702,7 @@ button {
 }
 
 .guild-banner h1,
+.remote-board h1,
 .arena-board h1 {
   margin-top: 6px;
 }
@@ -772,6 +778,54 @@ button {
   color: var(--text);
 }
 
+.remote-board {
+  min-height: 132px;
+  background:
+    linear-gradient(135deg, rgba(79, 185, 167, 0.22), transparent 54%),
+    #20231f;
+}
+
+.remote-board strong {
+  min-width: 86px;
+  padding: 9px 10px;
+  border: 1px solid rgba(215, 168, 63, 0.5);
+  border-radius: 8px;
+  color: var(--gold);
+  text-align: center;
+}
+
+.remote-panel label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.remote-panel input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #151714;
+  color: var(--text);
+  font: inherit;
+  padding: 9px 10px;
+}
+
+.remote-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#remoteLog {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 @media (max-width: 380px) {
   .app-shell {
     min-height: 100dvh;
@@ -795,5 +849,41 @@ button {
   .class-grid,
   .stat-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 860px) {
+  .app-shell {
+    width: min(100vw, 1040px);
+  }
+
+  .screen-panel.active[data-screen="adventure"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+    align-content: start;
+    gap: 12px;
+  }
+
+  .screen-panel.active[data-screen="adventure"] .combat-stage {
+    grid-row: span 3;
+    min-height: 520px;
+  }
+
+  .screen-panel.active[data-screen="adventure"] .mission-strip,
+  .screen-panel.active[data-screen="adventure"] .live-panel,
+  .screen-panel.active[data-screen="adventure"] .log-panel {
+    margin-top: 0;
+  }
+
+  .screen-panel.active[data-screen="remote"] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-content: start;
+    gap: 12px;
+  }
+
+  .screen-panel.active[data-screen="remote"] .remote-board,
+  .screen-panel.active[data-screen="remote"] .log-panel {
+    grid-column: 1 / -1;
   }
 }

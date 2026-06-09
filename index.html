@@ -157,6 +157,45 @@
             <ol id="leaderboard"></ol>
           </section>
         </section>
+
+        <section class="screen-panel" data-screen="remote">
+          <section class="remote-board">
+            <div>
+              <span class="eyebrow">Remote Link</span>
+              <h1>遠端連線</h1>
+              <p id="remoteStatus">建立房間或輸入房間碼，讓手機、電腦與網頁玩家加入同一個房間。</p>
+            </div>
+            <strong id="currentRoomCode">未連線</strong>
+          </section>
+
+          <section class="remote-panel">
+            <label>
+              <span>玩家名稱</span>
+              <input id="remoteAlias" type="text" maxlength="24" placeholder="榮耀玩家" />
+            </label>
+            <label>
+              <span>房間碼</span>
+              <input id="roomCodeInput" type="text" maxlength="6" placeholder="ABCDE" />
+            </label>
+            <div class="remote-actions">
+              <button id="createRoomButton" class="primary-button" type="button">建立</button>
+              <button id="joinRoomButton" class="secondary-button" type="button">加入</button>
+              <button id="syncRoomButton" class="secondary-button" type="button">同步</button>
+            </div>
+          </section>
+
+          <section class="remote-panel">
+            <div class="panel-heading">
+              <h2>連線玩家</h2>
+              <span id="remoteDeviceType">網頁版</span>
+            </div>
+            <div id="remotePlayers" class="team-list"></div>
+          </section>
+
+          <section class="log-panel" aria-label="遠端連線紀錄">
+            <div id="remoteLog"></div>
+          </section>
+        </section>
       </main>
 
       <nav class="tabbar" aria-label="主選單">
@@ -165,6 +204,7 @@
         <button data-nav="dungeon" type="button"><span>本</span><b>副本</b></button>
         <button data-nav="guild" type="button"><span>會</span><b>公會</b></button>
         <button data-nav="arena" type="button"><span>賽</span><b>競技</b></button>
+        <button data-nav="remote" type="button"><span>連</span><b>連線</b></button>
       </nav>
     </div>
 
