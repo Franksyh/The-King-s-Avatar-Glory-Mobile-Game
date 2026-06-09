@@ -1,14 +1,28 @@
 # 榮耀行動原型
 
+Status: MVP Prototype / Mobile Web Game / First-person battle prototype added
+
 這是一個可直接在瀏覽器執行的手機遊戲垂直切片，先把 MMORPG 手遊最核心的玩法跑起來：即時戰鬥、職業切換、技能冷卻、Boss、副本、裝備、公會、競技聯賽與本機存檔。
 
-## 執行
+> 商業化若要使用《全職高手》名稱、角色、隊伍、美術或小說設定，需要取得權利方授權。本專案目前使用原創視覺與可替換資料，適合作為玩法原型。
+
+## Screenshots
+
+### Mobile Battle
+
+![Mobile Battle](docs/screenshots/mobile-battle.png)
+
+### First Person Combat
+
+![First Person Combat](docs/screenshots/first-person-combat.png)
+
+## Play Locally
 
 ```powershell
 node server.js
 ```
 
-開啟：
+Open:
 
 ```text
 http://127.0.0.1:5173
@@ -18,7 +32,12 @@ http://127.0.0.1:5173
 
 也可以直接開啟 `index.html`，但 PWA 快取需要透過本機伺服器才會啟用。
 
-## 目前完成
+## Prototype Pages
+
+- `index.html`: 手機直式 2D Canvas 戰鬥 MVP
+- `first-person.html`: 第一人稱戰鬥視角原型
+
+## Features
 
 - 手機直式介面與虛擬搖桿
 - 25 種職業入口：24 職業加散人原型
@@ -29,7 +48,46 @@ http://127.0.0.1:5173
 - 公會科技、AI 隊友派遣、公會副本入口
 - 1v1、3v3、5v5 本地競技模擬
 - localStorage 自動存檔
+- 第一人稱戰鬥原型：準星、Boss 血條、第一人稱武器、技能鍵、畫面震動
 
-## 授權提醒
+## First Person Battle Direction
 
-正式商業化若要使用《全職高手》名稱、角色、隊伍、美術或小說設定，需要取得權利方授權。這個專案目前使用原創視覺與可替換資料，適合作為玩法原型與投資簡報前的可玩版本。
+下一版會把目前 2D 戰鬥逐步升級為手機第一人稱戰鬥體驗：
+
+- 中央準星與第一人稱武器視角
+- 手機觸控轉向與左手虛擬搖桿移動
+- 右手普攻、職業技能與絕招鍵
+- 上方 Boss 鎖定血條、傷害數字與技能冷卻
+- 可替換職業武器外觀，例如戰矛、法杖、雙槍、千機傘
+- WebXR / VR 模式前置架構
+
+## Roadmap
+
+- [x] 手機直式 2D 戰鬥 MVP
+- [x] README 截圖區塊與公開 repo 結構整理
+- [x] 第一人稱戰鬥 HTML prototype
+- [ ] 手機拖曳轉向與觸控視角旋轉
+- [ ] 角色模型 / 武器模型
+- [ ] Boss 技能範圍提示與更多攻擊模式
+- [ ] 截圖 GIF 與 GitHub Pages / Netlify Demo
+- [ ] WebXR / VR 模式
+
+## Project Structure
+
+```text
+assets/
+docs/
+  design/
+  screenshots/
+src/
+index.html
+first-person.html
+styles.css
+first-person.css
+server.js
+README.md
+```
+
+## Development Notes
+
+這個原型刻意保持無外部依賴，方便快速部署到 GitHub Pages、Netlify 或任何靜態網站服務。下一階段若要進入正式 3D，可以把戰鬥資料與職業資料抽成 JSON，再移植到 Three.js、Godot、Unity 或 Unreal。

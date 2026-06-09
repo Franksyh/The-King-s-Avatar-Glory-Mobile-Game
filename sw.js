@@ -2,8 +2,11 @@ const CACHE_NAME = "glory-mobile-prototype-v1";
 const ASSETS = [
   "./",
   "./index.html",
+  "./first-person.html",
   "./styles.css",
+  "./first-person.css",
   "./src/game.js",
+  "./src/firstPerson.js",
   "./manifest.json",
   "./assets/icon.svg"
 ];
