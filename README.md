@@ -1,6 +1,6 @@
 # 榮耀行動原型
 
-Status: MVP Prototype / Mobile Web Game / First-person battle prototype added
+Status: Dynamic MVP Prototype / Mobile Web Game / Netlify Functions live ops
 
 [Live Demo](https://the-kings-avatar-glory-mobile-game.netlify.app)
 
@@ -34,6 +34,15 @@ http://127.0.0.1:5173
 
 也可以直接開啟 `index.html`，但 PWA 快取需要透過本機伺服器才會啟用。
 
+## Dynamic Web Features
+
+本專案已從純靜態頁升級為 Netlify Functions 動態網站：
+
+- `/api/game-state`: 即時回傳伺服器時間、輪值活動、賽季名稱與排行榜
+- 首頁 Live Ops 區塊會從 API 讀取活動資料
+- 競技排行榜會使用 API 回傳的即時資料
+- 玩家可領取當前活動獎勵，領取狀態存在 localStorage
+
 ## Prototype Pages
 
 - `index.html`: 手機直式 2D Canvas 戰鬥 MVP
@@ -51,6 +60,7 @@ http://127.0.0.1:5173
 - 1v1、3v3、5v5 本地競技模擬
 - localStorage 自動存檔
 - 第一人稱戰鬥原型：準星、Boss 血條、第一人稱武器、技能鍵、畫面震動
+- Netlify Functions 動態 API：Live Ops、輪值活動與排行榜
 
 ## First Person Battle Direction
 
@@ -82,6 +92,8 @@ docs/
   design/
   screenshots/
 src/
+netlify/
+  functions/
 index.html
 first-person.html
 styles.css

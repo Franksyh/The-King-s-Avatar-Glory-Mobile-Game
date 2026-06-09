@@ -158,6 +158,9 @@
     questText: document.querySelector("#questText"),
     combatLog: document.querySelector("#combatLog"),
     primaryAction: document.querySelector("#primaryAction"),
+    liveEventTitle: document.querySelector("#liveEventTitle"),
+    liveEventText: document.querySelector("#liveEventText"),
+    claimLiveReward: document.querySelector("#claimLiveReward"),
     skillWheel: document.querySelector("#skillWheel"),
     classGrid: document.querySelector("#classGrid"),
     heroTitle: document.querySelector("#heroTitle"),
@@ -194,6 +197,7 @@
     gear: { weapon: null, armor: null, trinket: null },
     inventory: [],
     questStep: 0,
+    claimedLiveRewardKey: null,
     guildTech: 1,
     rating: 1000,
     seasonClaimed: false,
@@ -225,6 +229,8 @@
     buffs: [],
     combo: 0,
     bossAdapted: false,
+    serverState: null,
+    serverStateError: null,
     lastUiRender: 0
   };
 
@@ -250,6 +256,8 @@
     createSkillButtons();
     bindEvents();
     startDungeon("training", false);
+    refreshServerState();
+    window.setInterval(refreshServerState, 30000);
     renderAll();
     log("已進入第十區，行動端原型啟動。");
     requestAnimationFrame(loop);
@@ -267,6 +275,8 @@
         startDungeon(world.mode.id, true);
       }
     });
+
+    dom.claimLiveReward.addEventListener("click", claimLiveReward);
 
     dom.saveButton.addEventListener("click", () => {
       persist();
@@ -898,6 +908,7 @@
     renderHeader();
     renderCombatUi();
     renderQuest();
+    renderLiveOps();
     renderHero();
     renderDungeons();
     renderInventory();
@@ -945,6 +956,21 @@
     dom.questTitle.textContent = quest[0];
     dom.questText.textContent = quest[1];
     dom.primaryAction.textContent = world.waveComplete ? "結算" : "出戰";
+  }
+
+  function renderLiveOps() {
+    const event = world.serverState?.event;
+    if (!event) {
+      dom.liveEventTitle.textContent = world.serverStateError ? "連線失敗" : "連線中";
+      dom.liveEventText.textContent = world.serverStateError || "正在讀取伺服器活動。";
+      dom.claimLiveReward.disabled = true;
+      return;
+    }
+    const claimed = save.claimedLiveRewardKey === event.windowId;
+    dom.liveEventTitle.textContent = event.title;
+    dom.liveEventText.textContent = `${event.description} ${event.modifier}`;
+    dom.claimLiveReward.disabled = claimed;
+    dom.claimLiveReward.textContent = claimed ? "已領" : "領取";
   }
 
   function renderHero() {
@@ -1073,18 +1099,41 @@
 
   function renderArena() {
     dom.ratingValue.textContent = `積分 ${save.rating}`;
-    dom.seasonText.textContent = `${save.stats.wins} 勝 ${save.stats.losses} 敗 · ${rankName(save.rating)}`;
+    dom.seasonText.textContent = `${world.serverState?.season || "新秀季"} · ${save.stats.wins} 勝 ${save.stats.losses} 敗 · ${rankName(save.rating)}`;
     dom.seasonReward.textContent = save.seasonClaimed ? "已領" : "領取";
+    const serverRivals = world.serverState?.leaderboard?.map((item) => [item.name, item.rating]) || [];
     const rivals = [
-      ["藍橋訓練隊", 1288],
-      ["微光戰隊", 1216],
-      [save.name, save.rating],
-      ["輪轉槍線", 1052],
-      ["草堂新秀", 996]
-    ].sort((a, b) => b[1] - a[1]);
+      ...serverRivals,
+      [save.name, save.rating]
+    ].sort((a, b) => b[1] - a[1]).slice(0, 6);
     dom.leaderboard.innerHTML = rivals
       .map((item, index) => `<li><strong>${index + 1}. ${item[0]}</strong><span>${item[1]}</span></li>`)
       .join("");
+  }
+
+  async function refreshServerState() {
+    try {
+      const response = await fetch("/api/game-state", { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      world.serverState = await response.json();
+      world.serverStateError = null;
+      renderLiveOps();
+      renderArena();
+    } catch (error) {
+      world.serverStateError = "暫時無法讀取 Live Ops。";
+      renderLiveOps();
+    }
+  }
+
+  function claimLiveReward() {
+    const event = world.serverState?.event;
+    if (!event || save.claimedLiveRewardKey === event.windowId) return;
+    save.gold += event.reward.gold;
+    save.energy = clamp(save.energy + event.reward.energy, 0, getMaxEnergy());
+    save.claimedLiveRewardKey = event.windowId;
+    persist();
+    log(`領取 ${event.title}：金幣 +${event.reward.gold}，體力 +${event.reward.energy}。`);
+    renderAll();
   }
 
   function draw() {

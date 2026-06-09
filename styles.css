@@ -356,6 +356,7 @@ button {
 }
 
 .mission-strip,
+.live-panel,
 .hero-summary,
 .class-panel,
 .skill-panel,
@@ -372,6 +373,7 @@ button {
 }
 
 .mission-strip,
+.live-panel,
 .hero-summary,
 .arena-board,
 .panel-heading,
@@ -384,6 +386,8 @@ button {
 
 .mission-strip strong,
 .mission-strip p,
+.live-panel strong,
+.live-panel p,
 .hero-summary h1,
 .hero-summary p,
 .guild-banner h1,
@@ -394,6 +398,7 @@ button {
 }
 
 .mission-strip p,
+.live-panel p,
 .hero-summary p {
   margin-top: 4px;
   color: var(--muted);
@@ -421,6 +426,12 @@ button {
   padding: 10px;
   background: var(--surface-2);
   border: 1px solid var(--line);
+}
+
+.secondary-button.compact {
+  flex: 0 0 auto;
+  min-width: 68px;
+  padding-inline: 12px;
 }
 
 .small-button {

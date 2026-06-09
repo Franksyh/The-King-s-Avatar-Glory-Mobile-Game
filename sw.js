@@ -1,4 +1,4 @@
-const CACHE_NAME = "glory-mobile-prototype-v1";
+const CACHE_NAME = "glory-mobile-prototype-v2";
 const ASSETS = [
   "./",
   "./index.html",

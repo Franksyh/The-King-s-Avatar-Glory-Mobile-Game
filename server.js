@@ -14,8 +14,13 @@ const mime = {
   ".svg": "image/svg+xml; charset=utf-8"
 };
 
-const server = http.createServer((request, response) => {
+const server = http.createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host}`);
+  if (url.pathname === "/api/game-state" || url.pathname === "/.netlify/functions/game-state") {
+    await handleFunctionRequest(request, response);
+    return;
+  }
+
   const requested = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
   const filePath = path.normalize(path.join(root, requested));
 
@@ -38,6 +43,27 @@ const server = http.createServer((request, response) => {
     response.end(data);
   });
 });
+
+async function handleFunctionRequest(request, response) {
+  try {
+    const functionPath = path.join(root, "netlify", "functions", "game-state.mjs");
+    const functionModule = await import(`${pathToFileUrl(functionPath)}?t=${Date.now()}`);
+    const functionResponse = await functionModule.default(new Request(`http://localhost${request.url}`), {});
+    const body = await functionResponse.text();
+    response.writeHead(functionResponse.status, {
+      "Content-Type": functionResponse.headers.get("content-type") || "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    response.end(body);
+  } catch (error) {
+    response.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
+    response.end(JSON.stringify({ error: "Function failed", detail: error.message }));
+  }
+}
+
+function pathToFileUrl(filePath) {
+  return `file:///${filePath.replace(/\\/g, "/").replace(/^([A-Za-z]):/, "$1:")}`;
+}
 
 let currentPort = startPort;
 

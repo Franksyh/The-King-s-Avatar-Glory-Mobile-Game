@@ -5,6 +5,6 @@
   "description": "榮耀行動手遊垂直切片原型。",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check src/game.js && node --check src/firstPerson.js && node --check server.js"
+    "check": "node --check src/game.js && node --check src/firstPerson.js && node --check netlify/functions/game-state.mjs && node --check server.js"
   }
 }
