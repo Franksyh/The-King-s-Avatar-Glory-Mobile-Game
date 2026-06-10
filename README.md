@@ -27,7 +27,7 @@ Status: Dynamic MVP Prototype / Mobile/Desktop/Web Remote Multiplayer Link
 ## Play Locally
 
 ```powershell
-node server.js
+node local-server.js
 ```
 
 Open:
@@ -110,7 +110,7 @@ index.html
 first-person.html
 styles.css
 first-person.css
-server.js
+local-server.js
 README.md
 ```
 

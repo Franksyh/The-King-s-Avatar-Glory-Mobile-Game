@@ -4,9 +4,9 @@
   "private": true,
   "description": "榮耀行動手遊垂直切片原型。",
   "scripts": {
-    "start": "node server.js",
+    "start": "node local-server.js",
     "build:vercel": "node scripts/build-vercel.js",
-    "check": "node --check src/game.js && node --check src/firstPerson.js && node --check api/game-state.js && node --check api/remote-room.js && node --check netlify/functions/game-state.mjs && node --check netlify/functions/remote-room.mjs && node --check scripts/build-vercel.js && node --check server.js"
+    "check": "node --check src/game.js && node --check src/firstPerson.js && node --check api/game-state.js && node --check api/remote-room.js && node --check netlify/functions/game-state.mjs && node --check netlify/functions/remote-room.mjs && node --check scripts/build-vercel.js && node --check local-server.js"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.9"
