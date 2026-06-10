@@ -3,4 +3,7 @@ node_modules/
 verification-*.png
 .netlify/
 .vercel/
+dist/
 .DS_Store
+
+.vercel
