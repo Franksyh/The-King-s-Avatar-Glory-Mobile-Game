@@ -1,14 +1,14 @@
 :root {
   color-scheme: dark;
-  --bg: #121613;
-  --panel: rgba(18, 22, 19, 0.78);
-  --line: rgba(242, 240, 232, 0.18);
-  --text: #f2f0e8;
-  --muted: #a9afa3;
-  --gold: #d7a83f;
-  --red: #d9564a;
-  --teal: #4fb9a7;
-  --blue: #5d9bd6;
+  --bg: #101116;
+  --panel: rgba(12, 14, 20, 0.78);
+  --line: rgba(245, 194, 87, 0.24);
+  --text: #f8f2df;
+  --muted: #b8c1cb;
+  --gold: #f5c257;
+  --red: #ff5b62;
+  --teal: #40d6bf;
+  --blue: #58b7ff;
 }
 
 * {
@@ -21,7 +21,10 @@ body {
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: #0d100e;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(245, 194, 87, 0.15), transparent 28%),
+    radial-gradient(circle at 82% 22%, rgba(64, 214, 191, 0.13), transparent 30%),
+    linear-gradient(135deg, #080a10, #151116 54%, #10171a);
   color: var(--text);
   font-family:
     "Microsoft JhengHei",
@@ -44,14 +47,20 @@ a {
   min-height: 640px;
   margin: 0 auto;
   overflow: hidden;
-  background: var(--bg);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.42);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(245, 194, 87, 0.1), transparent 32%),
+    var(--bg);
+  border-inline: 1px solid rgba(245, 194, 87, 0.12);
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.42),
+    0 0 40px rgba(64, 214, 191, 0.08);
 }
 
 #fpCanvas {
   width: 100%;
   height: 100%;
   display: block;
+  outline: 0;
 }
 
 .fp-top,
@@ -96,11 +105,14 @@ a {
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--panel);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(245, 194, 87, 0.16), transparent 54%),
+    var(--panel);
   color: var(--gold);
   text-decoration: none;
   font-weight: 900;
   pointer-events: auto;
+  box-shadow: inset 0 0 18px rgba(245, 194, 87, 0.08);
 }
 
 .boss-hud {
@@ -110,8 +122,11 @@ a {
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--panel);
+  background:
+    linear-gradient(135deg, rgba(255, 91, 98, 0.1), transparent 42%),
+    var(--panel);
   backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .boss-hud div:first-child {
@@ -142,11 +157,13 @@ a {
 
 .boss-bar i,
 .meter.hp i {
-  background: var(--red);
+  background: linear-gradient(90deg, var(--red), #ff9d70);
+  box-shadow: 0 0 14px rgba(255, 91, 98, 0.5);
 }
 
 .meter.mp i {
-  background: var(--blue);
+  background: linear-gradient(90deg, var(--blue), var(--teal));
+  box-shadow: 0 0 14px rgba(64, 214, 191, 0.4);
 }
 
 .crosshair {
@@ -156,13 +173,14 @@ a {
   height: 42px;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(245, 194, 87, 0.42));
 }
 
 .crosshair::before,
 .crosshair::after {
   content: "";
   position: absolute;
-  background: rgba(242, 240, 232, 0.82);
+  background: rgba(248, 242, 223, 0.86);
 }
 
 .crosshair::before {
@@ -193,14 +211,14 @@ a {
   color: var(--gold);
   font-size: 22px;
   font-weight: 900;
-  text-shadow: 0 2px 4px #000;
+  text-shadow: 0 2px 4px #000, 0 0 16px rgba(245, 194, 87, 0.52);
   animation: pop 780ms ease forwards;
 }
 
 .player-hud {
   left: 14px;
-  right: 14px;
-  bottom: 128px;
+  right: 142px;
+  bottom: 154px;
   display: grid;
   gap: 7px;
 }
@@ -227,9 +245,12 @@ a {
   bottom: 38px;
   width: 92px;
   height: 92px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(64, 214, 191, 0.28);
   border-radius: 999px;
-  background: rgba(18, 22, 19, 0.45);
+  background:
+    radial-gradient(circle, rgba(64, 214, 191, 0.13), transparent 64%),
+    rgba(12, 14, 20, 0.45);
+  box-shadow: inset 0 0 24px rgba(64, 214, 191, 0.12);
 }
 
 .move-stick i {
@@ -239,7 +260,9 @@ a {
   width: 38px;
   height: 38px;
   border-radius: 999px;
-  background: rgba(242, 240, 232, 0.72);
+  background:
+    radial-gradient(circle at 35% 26%, #fff8dd, rgba(245, 194, 87, 0.92) 36%, rgba(64, 214, 191, 0.75));
+  box-shadow: 0 0 18px rgba(64, 214, 191, 0.35);
   transform: translate(-50%, -50%);
 }
 
@@ -258,14 +281,28 @@ a {
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(245, 194, 87, 0.25);
   border-radius: 999px;
-  background: rgba(39, 45, 40, 0.9);
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.22), transparent 22%),
+    linear-gradient(145deg, rgba(64, 214, 191, 0.18), rgba(33, 38, 50, 0.96) 62%);
   font-weight: 900;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.28),
+    inset 0 0 18px rgba(64, 214, 191, 0.1);
 }
 
 .fp-skills button:nth-child(4) {
-  border-color: rgba(215, 168, 63, 0.62);
+  border-color: rgba(245, 194, 87, 0.72);
+}
+
+.fp-skills button::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(248, 242, 223, 0.12);
+  border-radius: 999px;
+  transform: rotate(45deg);
 }
 
 .fp-skills b,
@@ -296,7 +333,10 @@ a {
   padding: 9px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--panel);
+  background:
+    linear-gradient(135deg, rgba(245, 194, 87, 0.08), transparent 42%),
+    var(--panel);
+  backdrop-filter: blur(8px);
 }
 
 .shake {

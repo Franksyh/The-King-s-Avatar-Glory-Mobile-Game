@@ -28,7 +28,13 @@
       <main class="screens">
         <section class="screen-panel active" data-screen="adventure">
           <section class="combat-stage" aria-label="榮耀戰場">
-            <canvas id="gameCanvas" width="960" height="540"></canvas>
+            <canvas
+              id="gameCanvas"
+              width="960"
+              height="540"
+              tabindex="0"
+              aria-keyshortcuts="W A S D ArrowUp ArrowDown ArrowLeft ArrowRight 1 2 3 4 Space P R"
+            ></canvas>
             <div class="stage-hud">
               <div class="battle-target">
                 <span id="targetName">第十區訓練場</span>

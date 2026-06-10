@@ -230,6 +230,20 @@
     pointerId: null
   };
 
+  const controlKeys = new Set([
+    " ",
+    "w",
+    "a",
+    "s",
+    "d",
+    "arrowup",
+    "arrowdown",
+    "arrowleft",
+    "arrowright",
+    "p",
+    "r"
+  ]);
+
   const world = {
     width: 960,
     height: 540,
@@ -306,10 +320,7 @@
       log("角色資料已存檔。");
     });
 
-    dom.pauseButton.addEventListener("click", () => {
-      world.paused = !world.paused;
-      dom.pauseButton.textContent = world.paused ? "▶" : "II";
-    });
+    dom.pauseButton.addEventListener("click", togglePause);
 
     dom.craftButton.addEventListener("click", craftGear);
 
@@ -324,13 +335,22 @@
     dom.seasonReward.addEventListener("click", claimSeasonReward);
 
     window.addEventListener("keydown", (event) => {
-      input.keys.add(event.key.toLowerCase());
+      if (isEditableTarget(event.target)) return;
+      const key = event.key.toLowerCase();
+      if (isControlKey(event)) event.preventDefault();
+      input.keys.add(key);
       const skillIndex = Number.parseInt(event.key, 10) - 1;
-      if (skillIndex >= 0 && skillIndex < 4) {
+      if (!event.repeat && skillIndex >= 0 && skillIndex < 4) {
         useSkill(skillIndex);
       }
-      if (event.code === "Space") {
+      if (!event.repeat && event.code === "Space") {
         useSkill(0);
+      }
+      if (!event.repeat && key === "p") {
+        togglePause();
+      }
+      if (!event.repeat && key === "r") {
+        startDungeon(world.mode.id, false);
       }
     });
 
@@ -354,6 +374,20 @@
     if (remote.roomCode) {
       window.setTimeout(syncRemoteRoom, 0);
     }
+  }
+
+  function togglePause() {
+    world.paused = !world.paused;
+    dom.pauseButton.textContent = world.paused ? "▶" : "II";
+  }
+
+  function isControlKey(event) {
+    const key = event.key.toLowerCase();
+    return controlKeys.has(key) || (event.code.startsWith("Digit") && Number(event.code.slice(5)) >= 1 && Number(event.code.slice(5)) <= 4);
+  }
+
+  function isEditableTarget(target) {
+    return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target?.isContentEditable;
   }
 
   function createSkillButtons() {
@@ -1310,42 +1344,112 @@
   }
 
   function drawArenaFloor() {
-    ctx.fillStyle = "#171a15";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#1f241e";
-    for (let x = -40; x < canvas.width + 40; x += 80) {
-      for (let y = 88; y < canvas.height + 40; y += 80) {
-        if (((x + y) / 80) % 2 === 0) {
-          ctx.fillRect(x, y, 80, 80);
-        }
-      }
+    const width = canvas.width;
+    const height = canvas.height;
+    const sky = ctx.createLinearGradient(0, 0, 0, height);
+    sky.addColorStop(0, "#111827");
+    sky.addColorStop(0.34, "#16141d");
+    sky.addColorStop(0.72, "#151116");
+    sky.addColorStop(1, "#0b0d12");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.save();
+    ctx.globalAlpha = 0.46;
+    for (let i = 0; i < 5; i += 1) {
+      const x = 72 + i * 196 + Math.sin(world.timer * 0.35 + i) * 8;
+      ctx.fillStyle = i % 2 ? "rgba(64,214,191,0.16)" : "rgba(245,194,87,0.14)";
+      ctx.beginPath();
+      ctx.moveTo(x - 72, 88);
+      ctx.lineTo(x + 58, 62);
+      ctx.lineTo(x + 96, 138);
+      ctx.lineTo(x - 42, 166);
+      ctx.closePath();
+      ctx.fill();
     }
-    ctx.strokeStyle = "rgba(215,168,63,0.16)";
-    ctx.lineWidth = 2;
+    ctx.restore();
+
+    ctx.fillStyle = "rgba(245,194,87,0.08)";
+    ctx.beginPath();
+    ctx.moveTo(width * 0.5, 72);
+    ctx.lineTo(width * 0.17, height);
+    ctx.lineTo(width * 0.3, height);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "rgba(64,214,191,0.08)";
+    ctx.beginPath();
+    ctx.moveTo(width * 0.5, 72);
+    ctx.lineTo(width * 0.83, height);
+    ctx.lineTo(width * 0.7, height);
+    ctx.closePath();
+    ctx.fill();
+
+    const floor = ctx.createLinearGradient(0, 96, 0, height);
+    floor.addColorStop(0, "rgba(28,34,42,0.62)");
+    floor.addColorStop(0.52, "rgba(28,25,26,0.96)");
+    floor.addColorStop(1, "#101116");
+    ctx.fillStyle = floor;
+    ctx.fillRect(0, 86, width, height - 86);
+
+    ctx.strokeStyle = "rgba(64,214,191,0.18)";
+    ctx.lineWidth = 1.5;
+    for (let y = 116; y < height + 80; y += 42) {
+      ctx.beginPath();
+      ctx.moveTo(0, y + (y - 116) * 0.12);
+      ctx.lineTo(width, y + (y - 116) * 0.12);
+      ctx.stroke();
+    }
+    for (let i = -9; i <= 9; i += 1) {
+      const x = width / 2 + i * 74;
+      ctx.beginPath();
+      ctx.moveTo(width / 2, 96);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = "rgba(245,194,87,0.32)";
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.ellipse(480, 306, 344, 172, 0, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.strokeStyle = "rgba(79,185,167,0.16)";
-    ctx.strokeRect(36, 92, 888, 410);
+    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(480, 306, 212, 104, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    drawFloorRune(480, 306, 74, "rgba(245,194,87,0.42)", 0.92);
+    drawFloorRune(156, 150, 34, "rgba(64,214,191,0.3)", 0.52);
+    drawFloorRune(806, 420, 42, "rgba(157,124,255,0.28)", 0.5);
   }
 
   function drawPlayer() {
     const job = getJob();
     const pulse = 1 + Math.sin(world.timer * 7) * 0.025;
+    drawShadow(player.x, player.y + 15, player.r * 2.1, player.r * 0.75, 0.5);
     ctx.save();
     ctx.translate(player.x, player.y);
     ctx.scale(pulse, pulse);
-    ctx.fillStyle = player.invuln > 0 ? "#f2f0e8" : job.color;
+    drawPlayerWeapon(job);
+    ctx.shadowColor = job.color;
+    ctx.shadowBlur = player.invuln > 0 ? 28 : 15;
+    const body = ctx.createRadialGradient(-6, -9, 2, 0, 0, player.r * 1.45);
+    body.addColorStop(0, "#fff5c7");
+    body.addColorStop(0.3, player.invuln > 0 ? "#f8f2df" : job.color);
+    body.addColorStop(1, "#151116");
+    ctx.fillStyle = body;
     ctx.beginPath();
     ctx.arc(0, 0, player.r, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = "#f2f0e8";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(player.faceX * 7, player.faceY * 7);
-    ctx.lineTo(player.faceX * 30, player.faceY * 30);
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "rgba(248,242,223,0.86)";
+    ctx.lineWidth = 2.5;
     ctx.stroke();
-    ctx.fillStyle = "#151714";
+    ctx.strokeStyle = job.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, player.r + 8, world.timer * 1.8, world.timer * 1.8 + Math.PI * 1.25);
+    ctx.stroke();
+    ctx.fillStyle = "#101116";
     ctx.font = "bold 13px Microsoft JhengHei, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -1356,9 +1460,33 @@
   function drawEnemies() {
     for (const enemy of world.enemies) {
       const hpRatio = clamp(enemy.hp / enemy.maxHp, 0, 1);
+      drawShadow(enemy.x, enemy.y + enemy.r * 0.58, enemy.r * 1.8, enemy.r * 0.58, enemy.kind === "boss" ? 0.58 : 0.38);
       ctx.save();
       ctx.translate(enemy.x, enemy.y);
-      ctx.fillStyle = enemy.color;
+      ctx.shadowColor = enemy.color;
+      ctx.shadowBlur = enemy.kind === "boss" ? 28 : 12;
+      const enemyFill = ctx.createRadialGradient(-enemy.r * 0.32, -enemy.r * 0.42, 2, 0, 0, enemy.r * 1.35);
+      enemyFill.addColorStop(0, "rgba(255,255,255,0.76)");
+      enemyFill.addColorStop(0.26, enemy.color);
+      enemyFill.addColorStop(1, "#171119");
+      ctx.fillStyle = enemyFill;
+      if (enemy.kind === "boss") {
+        ctx.save();
+        ctx.rotate(world.timer * 0.55);
+        ctx.strokeStyle = "rgba(245,194,87,0.42)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, enemy.r + 16, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let i = 0; i < 8; i += 1) {
+          const angle = (Math.PI * 2 * i) / 8;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(angle) * (enemy.r + 6), Math.sin(angle) * (enemy.r + 6));
+          ctx.lineTo(Math.cos(angle) * (enemy.r + 22), Math.sin(angle) * (enemy.r + 22));
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
       ctx.beginPath();
       if (enemy.kind === "boss") {
         polygon(enemy.r, 8);
@@ -1368,9 +1496,15 @@
         ctx.arc(0, 0, enemy.r, 0, Math.PI * 2);
       }
       ctx.fill();
-      ctx.strokeStyle = "rgba(242,240,232,0.72)";
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "rgba(248,242,223,0.72)";
       ctx.lineWidth = enemy.kind === "boss" ? 3 : 2;
       ctx.stroke();
+      ctx.fillStyle = "rgba(248,242,223,0.82)";
+      ctx.beginPath();
+      ctx.arc(-enemy.r * 0.28, -enemy.r * 0.08, Math.max(2, enemy.r * 0.08), 0, Math.PI * 2);
+      ctx.arc(enemy.r * 0.28, -enemy.r * 0.08, Math.max(2, enemy.r * 0.08), 0, Math.PI * 2);
+      ctx.fill();
       ctx.fillStyle = "rgba(0,0,0,0.55)";
       ctx.fillRect(-enemy.r, -enemy.r - 12, enemy.r * 2, 5);
       ctx.fillStyle = enemy.kind === "boss" ? "#d9564a" : "#74b66a";
@@ -1381,12 +1515,24 @@
 
   function drawProjectiles() {
     for (const projectile of world.projectiles) {
-      ctx.fillStyle = projectile.color;
+      ctx.save();
+      ctx.shadowColor = projectile.color;
+      ctx.shadowBlur = 18;
+      const glow = ctx.createRadialGradient(projectile.x, projectile.y, 0, projectile.x, projectile.y, projectile.r * 3);
+      glow.addColorStop(0, projectile.color);
+      glow.addColorStop(0.38, `${projectile.color}88`);
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.arc(projectile.x, projectile.y, projectile.r, 0, Math.PI * 2);
+      ctx.arc(projectile.x, projectile.y, projectile.r * 3, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = "rgba(242,240,232,0.5)";
+      ctx.fillStyle = "#fff5c7";
+      ctx.beginPath();
+      ctx.arc(projectile.x, projectile.y, projectile.r * 0.75, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(248,242,223,0.5)";
       ctx.stroke();
+      ctx.restore();
     }
   }
 
@@ -1399,11 +1545,18 @@
       ctx.globalAlpha = (1 - t) * alpha;
       ctx.strokeStyle = effect.color;
       ctx.fillStyle = effect.color;
-      ctx.lineWidth = effect.type === "ultimate" ? 5 : 3;
+      ctx.shadowColor = effect.color;
+      ctx.shadowBlur = effect.type === "ultimate" ? 30 : 16;
+      ctx.lineCap = "round";
+      ctx.lineWidth = effect.type === "ultimate" ? 6 : 3;
       if (effect.type === "ring" || effect.type === "ultimate") {
         ctx.beginPath();
         ctx.arc(effect.x, effect.y, effect.radius * t, 0, Math.PI * 2);
         ctx.stroke();
+        if (effect.type === "ultimate") {
+          ctx.globalAlpha = (1 - t) * 0.18;
+          drawFloorRune(effect.x, effect.y, effect.radius * 0.34 + effect.radius * t * 0.28, effect.color, 1);
+        }
       } else if (effect.type === "slash") {
         ctx.translate(effect.x, effect.y);
         ctx.rotate(world.timer * 6);
@@ -1436,17 +1589,114 @@
   }
 
   function drawStatusText() {
-    ctx.fillStyle = "rgba(21,23,20,0.72)";
-    ctx.fillRect(0, 0, canvas.width, 76);
-    ctx.fillStyle = "#f2f0e8";
-    ctx.font = "bold 22px Microsoft JhengHei, sans-serif";
+    const panel = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    panel.addColorStop(0, "rgba(10,12,18,0.88)");
+    panel.addColorStop(0.58, "rgba(19,17,24,0.74)");
+    panel.addColorStop(1, "rgba(10,12,18,0.34)");
+    ctx.fillStyle = panel;
+    ctx.fillRect(0, 0, canvas.width, 78);
+    ctx.strokeStyle = "rgba(245,194,87,0.22)";
+    ctx.beginPath();
+    ctx.moveTo(0, 78);
+    ctx.lineTo(canvas.width, 78);
+    ctx.stroke();
+    ctx.fillStyle = "#f5c257";
+    ctx.font = "bold 12px Microsoft JhengHei, sans-serif";
+    const textX = 326;
     ctx.textAlign = "left";
-    ctx.fillText(world.mode.name, 30, 34);
-    ctx.fillStyle = "#a9afa3";
+    ctx.fillText("榮耀競技場", textX, 22);
+    ctx.fillStyle = "#f8f2df";
+    ctx.font = "bold 22px Microsoft JhengHei, sans-serif";
+    ctx.fillText(world.mode.name, textX, 48);
+    ctx.fillStyle = "#b8c1cb";
     ctx.font = "15px Microsoft JhengHei, sans-serif";
     const enemyCount = world.enemies.length;
     const status = world.waveComplete ? "副本完成" : `敵方 ${enemyCount} · 連段 ${world.combo}`;
-    ctx.fillText(status, 30, 58);
+    ctx.fillText(status, textX, 68);
+    ctx.textAlign = "right";
+    ctx.fillStyle = world.combo > 0 ? "#f5c257" : "#40d6bf";
+    ctx.font = "bold 18px Microsoft JhengHei, sans-serif";
+    ctx.fillText(world.combo > 0 ? `COMBO ${world.combo}` : "READY", canvas.width - 30, 48);
+  }
+
+  function drawFloorRune(x, y, radius, color, alpha) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.globalAlpha *= alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.62, 0, Math.PI * 2);
+    ctx.stroke();
+    for (let i = 0; i < 8; i += 1) {
+      const angle = (Math.PI * 2 * i) / 8 + world.timer * 0.12;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(angle) * radius * 0.26, Math.sin(angle) * radius * 0.26);
+      ctx.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawShadow(x, y, radiusX, radiusY, alpha) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(radiusX, radiusY);
+    const gradient = ctx.createRadialGradient(0, 0, 0.05, 0, 0, 1);
+    gradient.addColorStop(0, `rgba(0,0,0,${alpha})`);
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, 1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawPlayerWeapon(job) {
+    const angle = Math.atan2(player.faceY, player.faceX);
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.shadowColor = job.color;
+    ctx.shadowBlur = 16;
+    ctx.strokeStyle = job.color;
+    ctx.fillStyle = job.color;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(8, 0);
+    ctx.lineTo(46, 0);
+    ctx.stroke();
+    if (job.family === "神槍系") {
+      ctx.fillRect(22, -10, 28, 6);
+      ctx.fillRect(22, 4, 28, 6);
+    } else if (job.family === "魔法系") {
+      ctx.beginPath();
+      ctx.arc(48, 0, 10, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(48, 0, 4, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (job.family === "特殊") {
+      ctx.beginPath();
+      ctx.arc(24, 0, 14, -Math.PI * 0.82, Math.PI * 0.82);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(52, 0);
+      ctx.lineTo(40, -8);
+      ctx.lineTo(40, 8);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(52, 0);
+      ctx.lineTo(38, -7);
+      ctx.lineTo(38, 7);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
   }
 
   function polygon(radius, sides) {

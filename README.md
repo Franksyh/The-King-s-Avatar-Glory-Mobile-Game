@@ -1,10 +1,10 @@
 # 榮耀行動原型
 
-Status: Dynamic MVP Prototype / Mobile/Desktop/Web Remote Multiplayer Link
+Status: Dynamic MVP Prototype / Original Esports Fantasy Art Pass / Keyboard + Mobile Controls
 
-[Live Demo](https://the-kings-avatar-glory-mobile-game.netlify.app)
+[Live Demo](https://the-kings-avatar-glory-mobile-game.vercel.app)
 
-[Vercel Demo](https://the-kings-avatar-glory-mobile-game.vercel.app)
+[Netlify Mirror](https://the-kings-avatar-glory-mobile-game.netlify.app)
 
 這是一個可直接在瀏覽器執行的手機遊戲垂直切片，先把 MMORPG 手遊最核心的玩法跑起來：即時戰鬥、職業切換、技能冷卻、Boss、副本、裝備、公會、競技聯賽與本機存檔。
 
@@ -42,7 +42,7 @@ http://127.0.0.1:5173
 
 ## Dynamic Web Features
 
-本專案已從純靜態頁升級為 Netlify Functions 動態網站：
+本專案已從純靜態頁升級為可部署到 Vercel / Netlify 的動態網站：
 
 - `/api/game-state`: 即時回傳伺服器時間、輪值活動、賽季名稱與排行榜
 - `/api/remote-room`: 建立房間、加入房間、同步遠端玩家狀態
@@ -52,6 +52,14 @@ http://127.0.0.1:5173
 - Vercel 版本提供同名 `/api/*` 動態路由，可直接部署為 Vercel Functions
 - 玩家可領取當前活動獎勵，領取狀態存在 localStorage
 
+## Keyboard Controls
+
+- `WASD` / 方向鍵：移動或第一人稱轉向
+- `1` `2` `3` `4`：施放四個職業技能
+- `Space`：普攻 / 第一技能
+- `P`：暫停或恢復
+- `R`：重新開始目前 2D 副本
+
 ## Prototype Pages
 
 - `index.html`: 手機直式 2D Canvas 戰鬥 MVP
@@ -60,6 +68,8 @@ http://127.0.0.1:5173
 ## Features
 
 - 手機直式介面與虛擬搖桿
+- 原創職業競技場美術：舞台光束、地面符文、技能光圈、職業武器剪影
+- 鍵盤操控：WASD / 方向鍵移動，數字鍵與 Space 施放技能
 - 25 種職業入口：24 職業加散人原型
 - 依職系切換的 4 技能組與技能升級
 - Canvas 即時戰鬥、敵人 AI、Boss 二階段、投射物與傷害數字
@@ -90,6 +100,7 @@ http://127.0.0.1:5173
 - [x] 第一人稱戰鬥 HTML prototype
 - [x] Netlify Functions 動態 API
 - [x] 手機 / 電腦 / 網頁遠端連線房間
+- [x] 原創競技風畫面與鍵盤操控
 - [ ] 手機拖曳轉向與觸控視角旋轉
 - [ ] 角色模型 / 武器模型
 - [ ] Boss 技能範圍提示與更多攻擊模式
@@ -116,4 +127,4 @@ README.md
 
 ## Development Notes
 
-這個原型刻意保持無外部依賴，方便快速部署到 GitHub Pages、Netlify 或任何靜態網站服務。下一階段若要進入正式 3D，可以把戰鬥資料與職業資料抽成 JSON，再移植到 Three.js、Godot、Unity 或 Unreal。
+這個原型前端刻意保持無框架，方便快速部署到 GitHub Pages、Netlify、Vercel 或任何靜態網站服務。下一階段若要進入正式 3D，可以把戰鬥資料與職業資料抽成 JSON，再移植到 Three.js、Godot、Unity 或 Unreal。

@@ -23,12 +23,15 @@
     bossHp: 1000,
     bossMaxHp: 1000,
     bossDistance: 0.7,
+    lateral: 0,
     phase: 1,
     cooldowns: [0, 0, 0, 0],
     slash: 0,
     shield: 0,
     blast: 0,
-    shake: 0
+    shake: 0,
+    paused: false,
+    keys: new Set()
   };
 
   const skills = [
@@ -40,6 +43,7 @@
 
   let last = performance.now();
   let pointerX = null;
+  const controlKeys = new Set([" ", "w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright", "q", "e", "p"]);
 
   bind();
   requestAnimationFrame(loop);
@@ -50,17 +54,20 @@
     });
 
     window.addEventListener("keydown", (event) => {
+      const key = event.key.toLowerCase();
+      if (isControlKey(event)) event.preventDefault();
+      state.keys.add(key);
       const index = Number.parseInt(event.key, 10) - 1;
-      if (index >= 0 && index < skills.length) cast(index);
-      if (event.key === " ") cast(0);
-      if (event.key === "a" || event.key === "ArrowLeft") state.yaw -= 0.08;
-      if (event.key === "d" || event.key === "ArrowRight") state.yaw += 0.08;
-      if (event.key === "w" || event.key === "ArrowUp") state.speed = 1;
-      if (event.key === "s" || event.key === "ArrowDown") state.speed = -1;
+      if (!event.repeat && index >= 0 && index < skills.length) cast(index);
+      if (!event.repeat && event.key === " ") cast(0);
+      if (!event.repeat && key === "p") {
+        state.paused = !state.paused;
+        log(state.paused ? "戰鬥暫停，準星保持鎖定。" : "戰鬥恢復。");
+      }
     });
 
-    window.addEventListener("keyup", () => {
-      state.speed = 0;
+    window.addEventListener("keyup", (event) => {
+      state.keys.delete(event.key.toLowerCase());
     });
 
     canvas.addEventListener("pointerdown", (event) => {
@@ -90,8 +97,12 @@
 
   function update(dt) {
     state.time += dt;
+    if (state.paused) {
+      state.shake = Math.max(0, state.shake - dt * 4);
+      return;
+    }
+    updateKeyboard(dt);
     state.mp = Math.min(100, state.mp + dt * 8);
-    state.bossDistance = clamp(state.bossDistance - state.speed * dt * 0.28, 0.35, 1.2);
     state.slash = Math.max(0, state.slash - dt * 3);
     state.blast = Math.max(0, state.blast - dt * 2);
     state.shield = Math.max(0, state.shield - dt);
@@ -115,6 +126,16 @@
         log("模擬復活：重新鎖定 Boss。");
       }
     }
+  }
+
+  function updateKeyboard(dt) {
+    const forward = Number(state.keys.has("w") || state.keys.has("arrowup")) - Number(state.keys.has("s") || state.keys.has("arrowdown"));
+    const turn = Number(state.keys.has("d") || state.keys.has("arrowright")) - Number(state.keys.has("a") || state.keys.has("arrowleft"));
+    const strafe = Number(state.keys.has("e")) - Number(state.keys.has("q"));
+    state.yaw += turn * dt * 1.85;
+    state.bossDistance = clamp(state.bossDistance - forward * dt * 0.32, 0.35, 1.2);
+    state.lateral = clamp(state.lateral + strafe * dt * 0.48, -0.42, 0.42);
+    state.lateral *= 1 - Math.min(1, dt * 1.8);
   }
 
   function cast(index) {
@@ -154,54 +175,97 @@
 
   function drawSky() {
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#121613");
-    gradient.addColorStop(0.48, "#222820");
-    gradient.addColorStop(1, "#10130f");
+    gradient.addColorStop(0, "#101827");
+    gradient.addColorStop(0.42, "#17131d");
+    gradient.addColorStop(0.72, "#21161a");
+    gradient.addColorStop(1, "#0b0d12");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.strokeStyle = "rgba(215,168,63,0.16)";
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 9; i += 1) {
-      const x = ((i * 140 + state.yaw * 130) % 1120) - 80;
+    ctx.save();
+    ctx.globalAlpha = 0.62;
+    for (let i = 0; i < 7; i += 1) {
+      const x = ((i * 176 + state.yaw * 120) % 1240) - 140;
+      ctx.fillStyle = i % 2 ? "rgba(64,214,191,0.12)" : "rgba(245,194,87,0.12)";
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x - 180, canvas.height);
-      ctx.stroke();
+      ctx.moveTo(x, 34 + Math.sin(state.time + i) * 8);
+      ctx.lineTo(x + 116, 12);
+      ctx.lineTo(x + 168, 168);
+      ctx.lineTo(x + 38, 196);
+      ctx.closePath();
+      ctx.fill();
     }
+    ctx.restore();
+
+    ctx.fillStyle = "rgba(245,194,87,0.1)";
+    ctx.beginPath();
+    ctx.moveTo(canvas.width * 0.48 + Math.sin(state.yaw) * 50, 42);
+    ctx.lineTo(canvas.width * 0.16, canvas.height);
+    ctx.lineTo(canvas.width * 0.28, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "rgba(64,214,191,0.1)";
+    ctx.beginPath();
+    ctx.moveTo(canvas.width * 0.52 + Math.sin(state.yaw) * 50, 42);
+    ctx.lineTo(canvas.width * 0.84, canvas.height);
+    ctx.lineTo(canvas.width * 0.72, canvas.height);
+    ctx.closePath();
+    ctx.fill();
   }
 
   function drawArena() {
     const horizon = 270 + Math.sin(state.yaw) * 8;
-    ctx.fillStyle = "#171b16";
+    const floor = ctx.createLinearGradient(0, horizon, 0, canvas.height);
+    floor.addColorStop(0, "rgba(36,41,52,0.78)");
+    floor.addColorStop(0.52, "rgba(28,24,28,0.96)");
+    floor.addColorStop(1, "#0d0f13");
+    ctx.fillStyle = floor;
     ctx.fillRect(0, horizon, canvas.width, canvas.height - horizon);
-    ctx.strokeStyle = "rgba(79,185,167,0.22)";
+    ctx.strokeStyle = "rgba(64,214,191,0.28)";
     for (let i = 0; i < 11; i += 1) {
-      const y = horizon + i * i * 5.5;
+      const y = horizon + i * i * 5.8;
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
     }
     for (let i = -5; i <= 5; i += 1) {
-      const x = canvas.width / 2 + i * 88 + Math.sin(state.yaw) * 80;
+      const x = canvas.width / 2 + i * 88 + Math.sin(state.yaw) * 96 + state.lateral * 90;
       ctx.beginPath();
       ctx.moveTo(canvas.width / 2, horizon);
       ctx.lineTo(x, canvas.height);
       ctx.stroke();
     }
+    ctx.strokeStyle = "rgba(245,194,87,0.36)";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.ellipse(canvas.width / 2 + state.lateral * 92, horizon + 96, 240, 78, Math.sin(state.yaw) * 0.05, 0, Math.PI * 2);
+    ctx.stroke();
+    drawGroundRune(canvas.width / 2 + state.lateral * 110, horizon + 112, 76);
   }
 
   function drawBoss() {
-    const centerX = canvas.width / 2 - Math.sin(state.yaw) * 170;
+    const centerX = canvas.width / 2 - Math.sin(state.yaw) * 170 - state.lateral * 210;
     const centerY = 238 + state.bossDistance * 34;
     const size = 165 / state.bossDistance;
     const pulse = Math.sin(state.time * (state.phase === 1 ? 3 : 6)) * 8;
 
     ctx.save();
     ctx.translate(centerX, centerY);
-    ctx.fillStyle = state.phase === 1 ? "#8c78d6" : "#d9564a";
-    ctx.strokeStyle = "rgba(242,240,232,0.8)";
+    ctx.shadowColor = state.phase === 1 ? "#9d7cff" : "#ff5b62";
+    ctx.shadowBlur = 28;
+    ctx.strokeStyle = state.phase === 1 ? "rgba(157,124,255,0.72)" : "rgba(255,91,98,0.74)";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(0, 0, size * 0.66 + pulse * 0.5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    const fill = ctx.createRadialGradient(-size * 0.14, -size * 0.26, 4, 0, 0, size * 0.62);
+    fill.addColorStop(0, "#fff5c7");
+    fill.addColorStop(0.22, state.phase === 1 ? "#9d7cff" : "#ff5b62");
+    fill.addColorStop(1, "#171119");
+    ctx.fillStyle = fill;
+    ctx.strokeStyle = "rgba(248,242,223,0.82)";
     ctx.lineWidth = 5;
     ctx.beginPath();
     for (let i = 0; i < 8; i += 1) {
@@ -215,15 +279,22 @@
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "#f2f0e8";
+    ctx.fillStyle = "rgba(248,242,223,0.88)";
+    ctx.beginPath();
+    ctx.arc(-size * 0.16, -size * 0.04, Math.max(4, size * 0.035), 0, Math.PI * 2);
+    ctx.arc(size * 0.16, -size * 0.04, Math.max(4, size * 0.035), 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#f8f2df";
     ctx.font = `bold ${Math.max(20, size * 0.16)}px Microsoft JhengHei, sans-serif`;
     ctx.textAlign = "center";
     ctx.fillText("BOSS", 0, 6);
 
     if (state.blast > 0) {
       ctx.globalAlpha = state.blast;
-      ctx.strokeStyle = "#d7a83f";
+      ctx.strokeStyle = "#f5c257";
       ctx.lineWidth = 8;
       ctx.beginPath();
       ctx.arc(0, 0, size * (0.5 + state.blast), 0, Math.PI * 2);
@@ -237,18 +308,53 @@
     ctx.save();
     ctx.translate(canvas.width * 0.62 + sway, canvas.height * 0.78);
     ctx.rotate(-0.58 + state.slash * 0.42);
-    ctx.fillStyle = "#d7a83f";
-    ctx.fillRect(-16, -190, 32, 240);
-    ctx.fillStyle = "#f2f0e8";
-    ctx.fillRect(-44, -132, 88, 22);
-    ctx.fillStyle = "#4fb9a7";
-    ctx.fillRect(-26, 42, 52, 96);
+    ctx.shadowColor = "#f5c257";
+    ctx.shadowBlur = 20;
+    const blade = ctx.createLinearGradient(0, -210, 0, 80);
+    blade.addColorStop(0, "#fff5c7");
+    blade.addColorStop(0.34, "#f5c257");
+    blade.addColorStop(1, "#7a4c19");
+    ctx.fillStyle = blade;
+    ctx.fillRect(-14, -210, 28, 252);
+    ctx.fillStyle = "rgba(248,242,223,0.92)";
+    ctx.fillRect(-48, -142, 96, 20);
+    ctx.strokeStyle = "#40d6bf";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(0, -132, 48, Math.PI * 1.05, Math.PI * 1.95);
+    ctx.stroke();
+    ctx.fillStyle = "#40d6bf";
+    ctx.fillRect(-24, 34, 48, 110);
+    ctx.fillStyle = "#101116";
+    ctx.fillRect(-13, 46, 26, 76);
     if (state.shield > 0) {
       ctx.globalAlpha = 0.45;
-      ctx.strokeStyle = "#4fb9a7";
+      ctx.strokeStyle = "#40d6bf";
       ctx.lineWidth = 9;
       ctx.beginPath();
       ctx.arc(-52, -58, 118, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawGroundRune(x, y, radius) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.strokeStyle = "rgba(245,194,87,0.36)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(64,214,191,0.22)";
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.58, 0, Math.PI * 2);
+    ctx.stroke();
+    for (let i = 0; i < 8; i += 1) {
+      const angle = (Math.PI * 2 * i) / 8 + state.time * 0.1;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(angle) * radius * 0.22, Math.sin(angle) * radius * 0.22);
+      ctx.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
       ctx.stroke();
     }
     ctx.restore();
@@ -294,5 +400,11 @@
 
   function random(min, max) {
     return Math.random() * (max - min) + min;
+  }
+
+  function isControlKey(event) {
+    const key = event.key.toLowerCase();
+    const digit = Number(event.code.slice(5));
+    return controlKeys.has(key) || (event.code.startsWith("Digit") && digit >= 1 && digit <= 4);
   }
 })();
