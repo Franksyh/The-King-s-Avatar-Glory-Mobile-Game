@@ -5,6 +5,10 @@
   "functions": {
     "api/**/*.js": {
       "maxDuration": 10
+    },
+    "server.js": {
+      "includeFiles": "dist/**",
+      "maxDuration": 10
     }
   },
   "headers": [

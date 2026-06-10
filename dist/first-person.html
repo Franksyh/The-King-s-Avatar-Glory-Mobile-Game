@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#121613" />
+    <title>榮耀第一人稱戰鬥原型</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="first-person.css" />
+  </head>
+  <body>
+    <main class="fp-shell">
+      <canvas id="fpCanvas" width="960" height="540" aria-label="第一人稱戰鬥畫面"></canvas>
+
+      <header class="fp-top">
+        <div>
+          <span>First Person Battle</span>
+          <strong>第十區 Boss 試煉</strong>
+        </div>
+        <a href="index.html" aria-label="返回 2D 戰鬥">2D</a>
+      </header>
+
+      <section class="boss-hud" aria-label="Boss 狀態">
+        <div>
+          <span id="bossName">野圖守衛者</span>
+          <b id="bossPhase">Phase 1</b>
+        </div>
+        <div class="boss-bar"><i id="bossHp"></i></div>
+      </section>
+
+      <div class="crosshair" aria-hidden="true"></div>
+      <div id="damageLayer" class="damage-layer" aria-live="polite"></div>
+
+      <section class="player-hud" aria-label="玩家狀態">
+        <div class="stat-line">
+          <span>HP</span>
+          <div class="meter hp"><i id="playerHp"></i></div>
+          <b id="hpText">100</b>
+        </div>
+        <div class="stat-line">
+          <span>MP</span>
+          <div class="meter mp"><i id="playerMp"></i></div>
+          <b id="mpText">100</b>
+        </div>
+      </section>
+
+      <div class="move-stick" aria-label="移動搖桿"><i></i></div>
+
+      <section id="fpSkills" class="fp-skills" aria-label="技能">
+        <button data-skill="0" type="button"><b>突</b><span>千機突</span><i></i></button>
+        <button data-skill="1" type="button"><b>換</b><span>傘形切換</span><i></i></button>
+        <button data-skill="2" type="button"><b>連</b><span>全系連段</span><i></i></button>
+        <button data-skill="3" type="button"><b>絕</b><span>千機百裂</span><i></i></button>
+      </section>
+
+      <footer class="fp-log" id="fpLog">準星鎖定 Boss，開始第一人稱戰鬥測試。</footer>
+    </main>
+
+    <script src="src/firstPerson.js"></script>
+  </body>
+</html>

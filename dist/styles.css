@@ -1,0 +1,889 @@
+:root {
+  color-scheme: dark;
+  --bg: #151714;
+  --surface: #20231f;
+  --surface-2: #292d28;
+  --line: #3b4139;
+  --text: #f2f0e8;
+  --muted: #a9afa3;
+  --gold: #d7a83f;
+  --teal: #4fb9a7;
+  --red: #d9564a;
+  --violet: #8c78d6;
+  --green: #74b66a;
+  --blue: #5d9bd6;
+  --shadow: rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  background: #10120f;
+  color: var(--text);
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+button {
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.app-shell {
+  width: min(100vw, 520px);
+  height: 100dvh;
+  min-height: 640px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--bg);
+  box-shadow: 0 18px 60px var(--shadow);
+  overflow: hidden;
+}
+
+.topbar {
+  min-height: 68px;
+  padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #181b17;
+  border-bottom: 1px solid var(--line);
+}
+
+.player-id {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar-mark {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(215, 168, 63, 0.55);
+  border-radius: 8px;
+  background: #2c2618;
+  color: var(--gold);
+  font-weight: 900;
+}
+
+.player-id strong,
+.player-id span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-id strong {
+  max-width: 190px;
+  font-size: 15px;
+}
+
+.player-id span,
+.resource-strip,
+.eyebrow,
+.panel-heading span,
+.guild-banner p,
+.arena-board p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.resource-strip {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  white-space: nowrap;
+}
+
+.screens {
+  position: relative;
+  overflow: hidden;
+}
+
+.screen-panel {
+  position: absolute;
+  inset: 0;
+  display: none;
+  overflow-y: auto;
+  padding: 12px 12px 16px;
+  scrollbar-width: none;
+}
+
+.screen-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.screen-panel.active {
+  display: block;
+}
+
+.combat-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 248px;
+  overflow: hidden;
+  background: #141713;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.stage-hud,
+.vitals,
+.joystick,
+.skill-wheel {
+  position: absolute;
+}
+
+.stage-hud {
+  inset: 8px 8px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.battle-target {
+  min-width: 156px;
+  padding: 7px 8px;
+  background: rgba(21, 23, 20, 0.78);
+  border: 1px solid rgba(242, 240, 232, 0.12);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.battle-target span {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.thin-bar,
+.meter {
+  overflow: hidden;
+  background: rgba(242, 240, 232, 0.12);
+  border-radius: 999px;
+}
+
+.thin-bar {
+  height: 5px;
+}
+
+.thin-bar span,
+.meter span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: width 160ms ease;
+}
+
+.thin-bar span {
+  background: var(--red);
+}
+
+.icon-button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(242, 240, 232, 0.18);
+  border-radius: 8px;
+  background: rgba(21, 23, 20, 0.72);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  pointer-events: auto;
+}
+
+.icon-button.solid {
+  background: var(--gold);
+  color: #151714;
+  border-color: transparent;
+}
+
+.vitals {
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.vital-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 70px;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  text-shadow: 0 1px 2px #000;
+}
+
+.vital-row b {
+  text-align: right;
+  font-size: 11px;
+}
+
+.meter {
+  height: 8px;
+}
+
+.meter.hp span {
+  background: var(--red);
+}
+
+.meter.mp span {
+  background: var(--blue);
+}
+
+.joystick {
+  left: 16px;
+  bottom: 42px;
+  width: 92px;
+  height: 92px;
+  border: 1px solid rgba(242, 240, 232, 0.16);
+  border-radius: 999px;
+  background: rgba(21, 23, 20, 0.42);
+  backdrop-filter: blur(4px);
+  touch-action: none;
+}
+
+.joystick span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(242, 240, 232, 0.7);
+  transform: translate(-50%, -50%);
+}
+
+.skill-wheel {
+  right: 14px;
+  bottom: 42px;
+  width: 132px;
+  height: 132px;
+  display: grid;
+  grid-template-columns: repeat(2, 58px);
+  grid-template-rows: repeat(2, 58px);
+  place-content: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.skill-button {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(242, 240, 232, 0.22);
+  background: #2c302b;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+.skill-button:nth-child(4) {
+  border-color: rgba(215, 168, 63, 0.62);
+}
+
+.skill-button b {
+  z-index: 1;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.skill-button span {
+  z-index: 1;
+  max-width: 48px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skill-button .cooldown {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 0;
+  height: 0;
+  max-width: none;
+  background: rgba(0, 0, 0, 0.58);
+  transition: height 80ms linear;
+}
+
+.skill-button.ready {
+  background: #303a35;
+}
+
+.skill-button.locked {
+  opacity: 0.48;
+}
+
+.mission-strip,
+.live-panel,
+.hero-summary,
+.class-panel,
+.skill-panel,
+.inventory-panel,
+.guild-banner,
+.arena-board,
+.leaderboard,
+.remote-board,
+.remote-panel,
+.log-panel {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.mission-strip,
+.live-panel,
+.hero-summary,
+.arena-board,
+.remote-board,
+.panel-heading,
+.guild-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mission-strip strong,
+.mission-strip p,
+.live-panel strong,
+.live-panel p,
+.hero-summary h1,
+.hero-summary p,
+.guild-banner h1,
+.remote-board h1,
+.guild-banner p,
+.remote-board p,
+.arena-board h1,
+.arena-board p {
+  margin: 0;
+}
+
+.mission-strip p,
+.live-panel p,
+.hero-summary p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.primary-button,
+.secondary-button,
+.small-button,
+.arena-modes button {
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.primary-button {
+  min-width: 82px;
+  padding: 11px 14px;
+  background: var(--gold);
+  color: #17140b;
+}
+
+.secondary-button {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.secondary-button.compact {
+  flex: 0 0 auto;
+  min-width: 68px;
+  padding-inline: 12px;
+}
+
+.small-button {
+  padding: 7px 10px;
+  background: #394037;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.log-panel {
+  min-height: 96px;
+  max-height: 132px;
+  overflow: hidden;
+}
+
+#combatLog {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+#combatLog span:first-child {
+  color: var(--text);
+}
+
+.tabbar {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
+  gap: 6px;
+  background: #181b17;
+  border-top: 1px solid var(--line);
+}
+
+.tabbar button {
+  min-width: 0;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  gap: 1px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.tabbar button span {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.tabbar button b {
+  font-size: 11px;
+}
+
+.tabbar button.active {
+  background: #2d332d;
+  color: var(--gold);
+}
+
+.hero-summary h1,
+.guild-banner h1,
+.arena-board h1,
+.panel-heading.top h1 {
+  font-size: 23px;
+}
+
+.panel-heading h1,
+.panel-heading h2 {
+  margin: 0;
+}
+
+.panel-heading h2 {
+  font-size: 16px;
+}
+
+.panel-heading.top {
+  margin: 0 0 10px;
+  padding: 0 2px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.stat-tile,
+.class-card,
+.skill-row,
+.mode-card,
+.gear-slot,
+.inventory-item,
+.team-member,
+.leaderboard li {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.stat-tile {
+  padding: 10px;
+}
+
+.stat-tile span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stat-tile strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 19px;
+}
+
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.class-card {
+  min-height: 72px;
+  padding: 10px;
+  text-align: left;
+  background: #272b26;
+}
+
+.class-card strong,
+.class-card span {
+  display: block;
+}
+
+.class-card strong {
+  font-size: 14px;
+}
+
+.class-card span {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.class-card.active {
+  border-color: var(--gold);
+  background: #332e20;
+}
+
+.skill-list,
+.mode-list,
+.inventory-list,
+.team-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.skill-row,
+.mode-card,
+.inventory-item,
+.team-member {
+  padding: 10px;
+}
+
+.skill-row,
+.mode-card,
+.inventory-item,
+.team-member,
+.gear-slots {
+  display: grid;
+  gap: 8px;
+}
+
+.skill-row {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.skill-row strong,
+.mode-card strong,
+.inventory-item strong,
+.team-member strong {
+  display: block;
+  font-size: 14px;
+}
+
+.skill-row span,
+.mode-card span,
+.inventory-item span,
+.team-member span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.skill-row button,
+.mode-card button,
+.inventory-item button {
+  min-width: 70px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--teal);
+  color: #071512;
+  font-weight: 800;
+}
+
+.skill-row button:disabled,
+.inventory-item button:disabled {
+  background: #444a43;
+  color: #9ca39a;
+}
+
+.mode-card {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.mode-card[data-tone="red"] {
+  border-color: rgba(217, 86, 74, 0.46);
+}
+
+.mode-card[data-tone="gold"] {
+  border-color: rgba(215, 168, 63, 0.55);
+}
+
+.mode-card[data-tone="violet"] {
+  border-color: rgba(140, 120, 214, 0.5);
+}
+
+.gear-slots {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 10px;
+}
+
+.gear-slot {
+  min-height: 70px;
+  padding: 9px;
+}
+
+.gear-slot span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.gear-slot strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.guild-banner {
+  display: block;
+  min-height: 126px;
+  background:
+    linear-gradient(135deg, rgba(79, 185, 167, 0.24), transparent 50%),
+    #20231f;
+}
+
+.guild-banner h1,
+.remote-board h1,
+.arena-board h1 {
+  margin-top: 6px;
+}
+
+.guild-actions {
+  margin-top: 10px;
+}
+
+.team-member {
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+}
+
+.member-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #343a33;
+  color: var(--gold);
+  font-weight: 900;
+}
+
+.member-role {
+  min-width: 54px;
+  text-align: right;
+  color: var(--teal);
+  font-size: 12px;
+}
+
+.arena-board {
+  min-height: 132px;
+  background:
+    linear-gradient(135deg, rgba(215, 168, 63, 0.2), transparent 52%),
+    #20231f;
+}
+
+.arena-modes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.arena-modes button {
+  min-height: 52px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-weight: 900;
+}
+
+.leaderboard ol,
+.leaderboard {
+  margin-top: 10px;
+}
+
+.leaderboard ol {
+  padding-left: 0;
+  list-style: none;
+}
+
+.leaderboard li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding: 9px 10px;
+  color: var(--muted);
+}
+
+.leaderboard li strong {
+  color: var(--text);
+}
+
+.remote-board {
+  min-height: 132px;
+  background:
+    linear-gradient(135deg, rgba(79, 185, 167, 0.22), transparent 54%),
+    #20231f;
+}
+
+.remote-board strong {
+  min-width: 86px;
+  padding: 9px 10px;
+  border: 1px solid rgba(215, 168, 63, 0.5);
+  border-radius: 8px;
+  color: var(--gold);
+  text-align: center;
+}
+
+.remote-panel label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.remote-panel input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #151714;
+  color: var(--text);
+  font: inherit;
+  padding: 9px 10px;
+}
+
+.remote-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#remoteLog {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 380px) {
+  .app-shell {
+    min-height: 100dvh;
+  }
+
+  .combat-stage {
+    min-height: 232px;
+  }
+
+  .joystick {
+    width: 78px;
+    height: 78px;
+  }
+
+  .skill-wheel {
+    right: 10px;
+    transform: scale(0.9);
+    transform-origin: bottom right;
+  }
+
+  .class-grid,
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 860px) {
+  .app-shell {
+    width: min(100vw, 1040px);
+  }
+
+  .screen-panel.active[data-screen="adventure"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+    align-content: start;
+    gap: 12px;
+  }
+
+  .screen-panel.active[data-screen="adventure"] .combat-stage {
+    grid-row: span 3;
+    min-height: 520px;
+  }
+
+  .screen-panel.active[data-screen="adventure"] .mission-strip,
+  .screen-panel.active[data-screen="adventure"] .live-panel,
+  .screen-panel.active[data-screen="adventure"] .log-panel {
+    margin-top: 0;
+  }
+
+  .screen-panel.active[data-screen="remote"] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-content: start;
+    gap: 12px;
+  }
+
+  .screen-panel.active[data-screen="remote"] .remote-board,
+  .screen-panel.active[data-screen="remote"] .log-panel {
+    grid-column: 1 / -1;
+  }
+}
