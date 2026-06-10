@@ -2,4 +2,5 @@ node_modules/
 *.log
 verification-*.png
 .netlify/
+.vercel/
 .DS_Store

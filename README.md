@@ -4,6 +4,8 @@ Status: Dynamic MVP Prototype / Mobile/Desktop/Web Remote Multiplayer Link
 
 [Live Demo](https://the-kings-avatar-glory-mobile-game.netlify.app)
 
+[Vercel Demo](https://the-kings-avatar-glory-mobile-game.vercel.app)
+
 這是一個可直接在瀏覽器執行的手機遊戲垂直切片，先把 MMORPG 手遊最核心的玩法跑起來：即時戰鬥、職業切換、技能冷卻、Boss、副本、裝備、公會、競技聯賽與本機存檔。
 
 > 商業化若要使用《全職高手》名稱、角色、隊伍、美術或小說設定，需要取得權利方授權。本專案目前使用原創視覺與可替換資料，適合作為玩法原型。
@@ -47,6 +49,7 @@ http://127.0.0.1:5173
 - 首頁 Live Ops 區塊會從 API 讀取活動資料
 - 競技排行榜會使用 API 回傳的即時資料
 - 遠端連線頁可用房間碼支援手機版、電腦版、網頁版玩家同步
+- Vercel 版本提供同名 `/api/*` 動態路由，可直接部署為 Vercel Functions
 - 玩家可領取當前活動獎勵，領取狀態存在 localStorage
 
 ## Prototype Pages
